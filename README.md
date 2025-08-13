@@ -1,14 +1,14 @@
-# StablQ
+# SurfQ
 
-**StablQ** is a Python framework for efficiently simulating stabiliser quantum codes and their behaviour under noise. The aim is to provide a modular architecture to implement different codes, including small stabiliser codes and surface codes, and analyse their robustness under various physical error models. Future extensions include lattice surgery, state injection and magic state distillation.
+**SurfQ** is a Python framework for efficiently simulating surface codes under noise. The aim is to enable detailed investigation of the behavior of surface codes under different physical error models, supporting advanced fault-tolerant protocols such as lattice surgery, state injection, and magic state distillation as future extensions.
 
-Key features:
-- Represent stabiliser codes as Pauli strings or check matrices
-- Apply quantum operations (X, Z, H, CNOT) and measurements
-- Simulate different noise channels: Pauli, depolarising, bit-flip, phase-flip
-- Analyse logical error rates and syndrome statistics
-- Extendable framework for surface codes and fault-tolerant protocols
+## Features:
 
+- Intuitive surface code representation
+- Apply quantum operations: X, Z, H, CNOT, and syndrome measurement
+- Simulate various noise channels: Pauli noise, depolarizing, bit-flip, phase-flip errors
+- Analyse logical error rates and syndrome measurement statistics for error correction
+- Modular and extensible framework for surface code simulation and fault-tolerant quantum protocols
 
 ## References
 
