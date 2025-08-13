@@ -10,3 +10,7 @@ Key features:
 - Extendable framework for surface codes and fault-tolerant protocols
 
 
+## References
+
+- [Stim: a fast stabilizer circuit simulator](https://arxiv.org/abs/2103.02202) – Gidney, 2021
+- [STABSim: A Parallelized Clifford Simulator with Features Beyond Direct Simulation](https://arxiv.org/abs/2507.03092) – Garner et al., 2025
