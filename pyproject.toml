@@ -4,35 +4,27 @@ version = "0.1.0"
 description = "A surface code simulator"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "numpy>=2.3.2",
+]
 authors = [
-    { name = "Your Name", email = "you@example.com" }
+    { name = "João Ramos", email = "1joaoramos1@gmail.com" }
 ]
-license = { text = "MIT" }
+license = "MIT"
 keywords = ["python", "project", "surfq"]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent"
-]
 
 [tool.ruff]
 line-length = 88
-pydocstyle = { convention = "google" }
-extend-ignore = ["E203"]  
 
 [tool.ruff.lint]
-select = [
-    "E302",  # blank lines
-    "E305",  # blank lines after class/function
-    "D100",  # missing module docstring
-    "D101",  # missing class docstring
-    "D102",  # missing method docstring
-    "D103",  # missing function docstring
-]
+select = ["E", "D"]
+ignore = ["E203"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
 
 [tool.basedpyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "recommended"
 reportOptionalSubscript = false
 reportOptionalMemberAccess = false
 reportGeneralTypeIssues = false
@@ -40,8 +32,15 @@ reportGeneralTypeIssues = false
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-ra -q"
-testpaths = ["tests"]
+testpaths = ["src/tests"]
+pythonpath = ["src"] 
 
 [build-system]
 requires = ["setuptools>=65.5.0", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "ruff>=0.12.8",
+]
