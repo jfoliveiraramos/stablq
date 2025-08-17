@@ -12,5 +12,6 @@
 
 ## References
 
+- [Improved Simulation of Stabilizer Circuits](https://arxiv.org/abs/quant-ph/0406196v5) – Aaronson and Gottesman, 2008
 - [Stim: a fast stabilizer circuit simulator](https://arxiv.org/abs/2103.02202) – Gidney, 2021
 - [STABSim: A Parallelized Clifford Simulator with Features Beyond Direct Simulation](https://arxiv.org/abs/2507.03092) – Garner et al., 2025

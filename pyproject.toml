@@ -18,7 +18,7 @@ line-length = 88
 
 [tool.ruff.lint]
 select = ["E", "D"]
-ignore = ["E203"]
+ignore = ["D107", "E203", "E741"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"
