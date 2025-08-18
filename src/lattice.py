@@ -2,7 +2,9 @@
 
 from typing import Callable, final
 
+import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.patches import Polygon, Wedge
 
 
 @final
@@ -18,6 +20,7 @@ class Lattice:
         self.L = L
         self.n = L**2
         self.stabilisers = self.surface_code_stabilisers(L)
+        self.tableau = self.stabilisers.copy()
 
     @staticmethod
     def surface_code_stabilisers(L: int):
@@ -31,7 +34,7 @@ class Lattice:
         for row in range(L - 1):
             for col in range((L - 1) // 2):
                 i = row * L
-                j = 2 * col + 0 if row % 2 == 0 else 1
+                j = 2 * col + (0 if row % 2 == 0 else 1)
                 mask = i + j + np.array([0, 1, L, L + 1])
                 stabilisers[s, mask] = 1
                 s += 1
@@ -54,7 +57,7 @@ class Lattice:
         for row in range(L - 1):
             for col in range((L - 1) // 2):
                 i = row * L
-                j = 2 * col + 0 if row % 2 == 1 else 1
+                j = 2 * col + (0 if row % 2 == 1 else 1)
                 mask = n + i + j + np.array([0, 1, L, L + 1])
                 stabilisers[s, mask] = 1
                 s += 1
@@ -92,23 +95,23 @@ class Lattice:
     @_validate_qubit
     def H(self, qubit: int):
         """Apply Hadamard gate."""
-        self.stabilisers[:, qubit], self.stabilisers[:, qubit + self.n] = (
-            self.stabilisers[:, qubit + self.n].copy(),
-            self.stabilisers[:, qubit].copy(),
+        self.tableau[:, qubit], self.tableau[:, qubit + self.n] = (
+            self.tableau[:, qubit + self.n].copy(),
+            self.tableau[:, qubit].copy(),
         )
         return self
 
     @_validate_qubit
     def S(self, qubit: int):
         """Apply S gate."""
-        self.stabilisers[:, qubit + self.n] ^= self.stabilisers[:, qubit]
+        self.tableau[:, qubit + self.n] ^= self.tableau[:, qubit]
         return self
 
     @_validate_qubit
     def CX(self, control: int, target: int):
         """Apply Controlled-X gate."""
-        self.stabilisers[:, target] ^= self.stabilisers[:, control]
-        self.stabilisers[:, self.n + control] ^= self.stabilisers[:, self.n + target]
+        self.tableau[:, target] ^= self.tableau[:, control]
+        self.tableau[:, self.n + control] ^= self.tableau[:, self.n + target]
         return self
 
     @_validate_qubit
@@ -120,3 +123,77 @@ class Lattice:
     def X(self, qubit: int):
         """Apply X gate."""
         return self.H(qubit).Z(qubit).H(qubit)
+
+    def plot(self):
+        """Plot lattice."""
+        L = self.L
+        n = self.n
+        stabilisers = self.stabilisers
+        x, y = np.meshgrid(np.arange(L), np.arange(L))
+        grid_x = x.flatten()
+        grid_y = y.flatten()
+
+        for stabiliser in stabilisers[: (n - 1) // 2, :n]:  # pyright: ignore[reportAny]
+            indices = np.where(stabiliser == 1)[0]  # pyright: ignore[reportAny]
+            x = indices % L
+            y = L - 1 - indices // L
+            if len(indices) == 4:
+                points = np.column_stack((x, y))
+                points[[-2, -1]] = points[[-1, -2]]
+                polygon = Polygon(points, color="orange", alpha=0.5)
+                _ = plt.gca().add_patch(polygon)
+            if len(indices) == 2:
+                cx, cy = float(np.mean(x)), float(np.mean(y))
+                wedge = Wedge(
+                    center=(cx, cy),
+                    r=0.5,
+                    theta1=180 if y[0] == 0 else 0,
+                    theta2=180 if y[0] != 0 else 0,
+                    color="orange",
+                    alpha=0.5,
+                )
+                _ = plt.gca().add_patch(wedge)
+
+        for stabiliser in stabilisers[(n - 1) // 2 :, n:]:  # pyright: ignore[reportAny]
+            indices = np.where(stabiliser == 1)[0]  # pyright: ignore[reportAny]
+            x = indices % L
+            y = L - 1 - indices // L
+            if len(indices) == 4:
+                points = np.column_stack((x, y))
+                points[[-2, -1]] = points[[-1, -2]]
+                polygon = Polygon(points, color="cyan", alpha=0.5)
+                _ = plt.gca().add_patch(polygon)
+            if len(indices) == 2:
+                cx, cy = float(np.mean(x)), float(np.mean(y))
+                wedge = Wedge(
+                    center=(cx, cy),
+                    r=0.5,
+                    theta1=90 if x[0] == 0 else -90,
+                    theta2=-90 if x[0] == 0 else 90,
+                    color="cyan",
+                    alpha=0.5,
+                )
+                _ = plt.gca().add_patch(wedge)
+
+        _ = plt.grid(True)  # pyright: ignore[reportUnknownMemberType]
+        _ = plt.scatter(grid_x, grid_y, s=100, color="k")  # pyright: ignore[reportUnknownMemberType]
+        _ = plt.xticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        _ = plt.yticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        _ = plt.gca().set_aspect("equal")
+        _ = plt.xlim(-1, L)  # pyright: ignore[reportUnknownMemberType]
+        _ = plt.ylim(-1, L)  # pyright: ignore[reportUnknownMemberType]
+        plt.text(
+            6,
+            1.2,
+            "x",
+            color="white",
+            bbox=dict(facecolor="orange", edgecolor="black", boxstyle="round,pad=0.3"),
+        )
+        plt.text(
+            7,
+            1.2,
+            "y",
+            color="white",
+            bbox=dict(facecolor="blue", edgecolor="black", boxstyle="round,pad=0.3"),
+        )
+        _ = plt.show()  # pyright: ignore[reportUnknownMemberType]

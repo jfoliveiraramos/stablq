@@ -6,7 +6,7 @@ from lattice import Lattice
 def main():
     """Entry-point."""
     lattice = Lattice(3)
-    _ = lattice.H(0)
+    _ = lattice.plot()
 
 
 if __name__ == "__main__":
