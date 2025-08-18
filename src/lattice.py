@@ -5,6 +5,7 @@ from typing import Callable, final
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch, Polygon, Wedge
+from numpy.typing import NDArray
 
 
 @final
@@ -20,14 +21,20 @@ class Lattice:
         self.L = L
         self.n = L**2
         self.stabilisers = self.surface_code_stabilisers(L)
-        self.tableau = self.stabilisers.copy()
+        self.tableau = np.hstack(
+            [
+                self.stabilisers,
+                np.zeros((self.stabilisers.shape[0], 1), dtype=self.stabilisers.dtype),
+            ]
+        )
+        self.operations: list[tuple[str, int]] = []
 
     @staticmethod
     def surface_code_stabilisers(L: int):
         """Define stabilisers."""
-        stabilisers = np.zeros((L**2 - 1, 2 * L**2), dtype=np.uint8)
-
         n = L**2
+        stabilisers = np.zeros((n - 1, 2 * n), dtype=np.uint8)
+
         s = 0
 
         # Set up inner X stabilisers
@@ -95,6 +102,7 @@ class Lattice:
     @_validate_qubit
     def H(self, qubit: int):
         """Apply Hadamard gate."""
+        self.tableau[:, -1] ^= self.tableau[:, qubit] & self.tableau[:, qubit + self.n]
         self.tableau[:, qubit], self.tableau[:, qubit + self.n] = (
             self.tableau[:, qubit + self.n].copy(),
             self.tableau[:, qubit].copy(),
@@ -104,6 +112,7 @@ class Lattice:
     @_validate_qubit
     def S(self, qubit: int):
         """Apply S gate."""
+        self.tableau[:, -1] ^= self.tableau[:, qubit] & self.tableau[:, qubit + self.n]
         self.tableau[:, qubit + self.n] ^= self.tableau[:, qubit]
         return self
 
@@ -117,72 +126,73 @@ class Lattice:
     @_validate_qubit
     def Z(self, qubit: int):
         """Apply Z gate."""
+        self.operations.append(("Z", qubit))
         return self.S(qubit).S(qubit)
 
     @_validate_qubit
     def X(self, qubit: int):
         """Apply X gate."""
+        self.operations.append(("X", qubit))
         return self.H(qubit).Z(qubit).H(qubit)
 
-    def plot(self):
+    def plot(self) -> None:
         """Plot lattice."""
-        L = self.L
-        n = self.n
-        stabilisers = self.stabilisers
-        x, y = np.meshgrid(np.arange(L), np.arange(L))
-        grid_x = x.flatten()
-        grid_y = y.flatten()
+        L: int = self.L
+        n: int = self.n
+        tableau: NDArray[np.uint8] = self.tableau
+        x_grid, y_grid = np.meshgrid(np.arange(L), np.arange(L))
+        grid_x, grid_y = x_grid.flatten(), y_grid.flatten()
+        ax = plt.gca()  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
 
-        for stabiliser in stabilisers[: (n - 1) // 2, :n]:  # pyright: ignore[reportAny]
-            indices = np.where(stabiliser == 1)[0]  # pyright: ignore[reportAny]
+        def draw_polygon_or_wedge(
+            indices: NDArray[np.uint64],
+            color_base: str,
+            is_syndrome: bool,
+        ) -> None:
             x = indices % L
             y = L - 1 - indices // L
+            color: str = "red" if is_syndrome else color_base
+
             if len(indices) == 4:
-                points = np.column_stack((x, y))
-                points[[-2, -1]] = points[[-1, -2]]
-                polygon = Polygon(points, color="orange", alpha=0.5)
-                _ = plt.gca().add_patch(polygon)
-            if len(indices) == 2:
+                pts = np.column_stack((x, y))
+                pts[[-2, -1]] = pts[[-1, -2]]
+                patch = Polygon(list(pts), color=color, alpha=0.5)
+            elif len(indices) == 2:
                 cx, cy = float(np.mean(x)), float(np.mean(y))
-                wedge = Wedge(
+                if color_base == "orange":
+                    theta1, theta2 = (180, 0) if y[0] == 0 else (0, 180)
+                else:  # cyan
+                    theta1, theta2 = (90, -90) if x[0] == 0 else (-90, 90)
+                patch = Wedge(
                     center=(cx, cy),
                     r=0.5,
-                    theta1=180 if y[0] == 0 else 0,
-                    theta2=180 if y[0] != 0 else 0,
-                    color="orange",
+                    theta1=theta1,
+                    theta2=theta2,
+                    color=color,
                     alpha=0.5,
                 )
-                _ = plt.gca().add_patch(wedge)
+            else:
+                return
 
-        for stabiliser in stabilisers[(n - 1) // 2 :, n:]:  # pyright: ignore[reportAny]
-            indices = np.where(stabiliser == 1)[0]  # pyright: ignore[reportAny]
-            x = indices % L
-            y = L - 1 - indices // L
-            if len(indices) == 4:
-                points = np.column_stack((x, y))
-                points[[-2, -1]] = points[[-1, -2]]
-                polygon = Polygon(points, color="cyan", alpha=0.5)
-                _ = plt.gca().add_patch(polygon)
-            if len(indices) == 2:
-                cx, cy = float(np.mean(x)), float(np.mean(y))
-                wedge = Wedge(
-                    center=(cx, cy),
-                    r=0.5,
-                    theta1=90 if x[0] == 0 else -90,
-                    theta2=-90 if x[0] == 0 else 90,
-                    color="cyan",
-                    alpha=0.5,
-                )
-                _ = plt.gca().add_patch(wedge)
+            ax.add_patch(patch)  # pyright: ignore[reportUnknownMemberType]
 
-        _ = plt.grid(True)  # pyright: ignore[reportUnknownMemberType]
-        _ = plt.scatter(grid_x, grid_y, s=100, color="k")  # pyright: ignore[reportUnknownMemberType]
-        _ = plt.xticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
-        _ = plt.yticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
-        _ = plt.gca().set_aspect("equal")
-        _ = plt.xlim(-1, L)  # pyright: ignore[reportUnknownMemberType]
-        _ = plt.ylim(-1, L)  # pyright: ignore[reportUnknownMemberType]
-        _ = plt.legend(  # pyright: ignore[reportUnknownMemberType]
+        for stab in tableau[: (n - 1) // 2]:  # pyright: ignore[reportAny]
+            indices: np.ndarray = np.where(stab[:n] == 1)[0]  # pyright: ignore[reportAny]
+            draw_polygon_or_wedge(indices, "orange", stab[-1] == 1)  # pyright: ignore[reportAny]
+
+        for stab in tableau[(n - 1) // 2 :]:  # pyright: ignore[reportAny]
+            indices = np.where(stab[n:-1] == 1)[0]  # pyright: ignore[reportAny]
+            draw_polygon_or_wedge(indices, "cyan", stab[-1] == 1)  # pyright: ignore[reportAny]
+
+        ax.scatter(grid_x, grid_y, s=100, color="k")  # pyright: ignore[reportUnknownMemberType]
+        ax.set_xticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        ax.set_yticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        ax.set_aspect("equal")  # pyright: ignore[reportUnknownMemberType]
+        ax.set_xlim(-1, L)  # pyright: ignore[reportUnknownMemberType]
+        ax.set_ylim(-1, L)  # pyright: ignore[reportUnknownMemberType]
+        ax.grid(True)  # pyright: ignore[reportUnknownMemberType]
+
+        ax.legend(  # pyright: ignore[reportUnknownMemberType]
             handles=[
                 Patch(
                     facecolor="orange",
@@ -202,4 +212,5 @@ class Lattice:
             fontsize=14,
             markerscale=2.0,
         )
-        _ = plt.show()  # pyright: ignore[reportUnknownMemberType]
+
+        plt.show()  # pyright: ignore[reportUnknownMemberType]
