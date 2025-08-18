@@ -4,7 +4,7 @@ from typing import Callable, final
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.patches import Polygon, Wedge
+from matplotlib.patches import Patch, Polygon, Wedge
 
 
 @final
@@ -182,18 +182,24 @@ class Lattice:
         _ = plt.gca().set_aspect("equal")
         _ = plt.xlim(-1, L)  # pyright: ignore[reportUnknownMemberType]
         _ = plt.ylim(-1, L)  # pyright: ignore[reportUnknownMemberType]
-        plt.text(
-            6,
-            1.2,
-            "x",
-            color="white",
-            bbox=dict(facecolor="orange", edgecolor="black", boxstyle="round,pad=0.3"),
-        )
-        plt.text(
-            7,
-            1.2,
-            "y",
-            color="white",
-            bbox=dict(facecolor="blue", edgecolor="black", boxstyle="round,pad=0.3"),
+        _ = plt.legend(  # pyright: ignore[reportUnknownMemberType]
+            handles=[
+                Patch(
+                    facecolor="orange",
+                    alpha=0.5,
+                    edgecolor="black",
+                    label="X-Stabiliser",
+                ),
+                Patch(
+                    facecolor="cyan", alpha=0.5, edgecolor="black", label="Z-Stabiliser"
+                ),
+            ],
+            handlelength=1,
+            handleheight=1,
+            borderpad=0.5,
+            loc="upper left",
+            bbox_to_anchor=(1.05, 1),
+            fontsize=14,
+            markerscale=2.0,
         )
         _ = plt.show()  # pyright: ignore[reportUnknownMemberType]
