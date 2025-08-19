@@ -6,7 +6,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "matplotlib>=3.10.5",
+    "networkx>=3.5",
     "numpy>=2.3.2",
+    "pyqt6>=6.9.1",
     "seaborn>=0.13.2",
 ]
 authors = [
@@ -14,6 +16,7 @@ authors = [
 ]
 license = "MIT"
 keywords = ["python", "project", "surfq"]
+
 
 [tool.ruff]
 line-length = 88
@@ -34,8 +37,8 @@ reportGeneralTypeIssues = false
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-ra -q"
-testpaths = ["src/tests"]
-pythonpath = ["src"] 
+testpaths = ["tests"]
+pythonpath = ["src/surfq"] 
 
 [build-system]
 requires = ["setuptools>=65.5.0", "wheel"]

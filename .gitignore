@@ -9,5 +9,6 @@ wheels/
 # Virtual environments
 .venv
 
-references/
+.ipynb_checkpoints
+
 references/**

@@ -10,6 +10,22 @@
 - Analyse logical error rates and syndrome measurement statistics for error correction
 - Modular and extensible framework for surface code simulation and fault-tolerant quantum protocols
 
+## Examples
+
+```shell
+uv run examples/main.py
+```
+
+## Notebooks
+
+```shell
+uvx juv run notebooks/main.py
+```
+```
+```
+```
+```
+
 ## References
 
 - [Improved Simulation of Stabilizer Circuits](https://arxiv.org/pdf/quant-ph/0406196v5) – Aaronson and Gottesman, 2008
