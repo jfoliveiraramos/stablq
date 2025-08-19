@@ -185,20 +185,24 @@ class Lattice:
     def _build_mask(self, qubits: QubitIndex) -> QubitMask:
         if isinstance(qubits, tuple):
             x = qubits[0]
+            x_len = 1
             if isinstance(x, slice):
                 start = 0 if x.start is None else int(x.start)  # pyright: ignore[reportAny]
                 stop = self.L if x.stop is None else int(x.stop)  # pyright: ignore[reportAny]
                 step = 1 if x.step is None else int(x.step)  # pyright: ignore[reportAny]
                 x = np.arange(start, stop, step, dtype=np.uint64)
+                x_len = len(x)
 
             y = qubits[1]
+            y_len = 1
             if isinstance(y, slice):
                 start = 0 if y.start is None else int(y.start)  # pyright: ignore[reportAny]
                 stop = self.L if y.stop is None else int(y.stop)  # pyright: ignore[reportAny]
                 step = 1 if y.step is None else int(y.step)  # pyright: ignore[reportAny]
                 y = np.arange(start, stop, step, dtype=np.uint64)
+                y_len = len(y)
 
-            return np.repeat(x, len(y)) + np.tile(y, len(x)) * self.L
+            return (np.repeat(x, y_len) + np.tile(y, x_len) * self.L).astype(np.uint64)
         elif isinstance(qubits, slice):
             start = 0 if qubits.start is None else qubits.start  # pyright: ignore[reportAny]
             stop = self.n if qubits.stop is None else qubits.stop  # pyright: ignore[reportAny]
@@ -385,6 +389,7 @@ class MutableLattice:
 
     def Z(self):
         """Apply Z gate."""
+        print(self.mask)
         self.paulis[self.mask] ^= Pauli.Z.value
         return self.S().S()
 
