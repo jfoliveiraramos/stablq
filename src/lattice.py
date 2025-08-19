@@ -1,12 +1,33 @@
 """Define Surface Code Lattice."""
 
 from enum import Enum
+from functools import cached_property
+from pathlib import Path, PosixPath
 from typing import Callable, final, override
 
+import matplotlib as mpl
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from matplotlib.patches import Patch, Polygon, Wedge
 from numpy.typing import NDArray
+
+sns.set_style("darkgrid")
+font_path = Path(__file__).parent.parent / "resources" / "fonts" / "Roboto-Regular.ttf"
+roboto_font = fm.FontProperties(fname=PosixPath(font_path))
+fm.fontManager.addfont(str(font_path))  # pyright: ignore[reportAny]
+mpl.rcParams.update(  # pyright: ignore[reportUnknownMemberType]
+    {
+        "font.family": roboto_font.get_name(),  # Prettier font
+        "font.size": 12,
+        "grid.color": "0.5",  # Softer grid
+        "grid.linestyle": "--",  # Dashed grid lines
+        "grid.linewidth": 0.6,
+        "xtick.color": "black",
+        "ytick.color": "black",
+    }
+)
 
 
 class Pauli(Enum):
@@ -44,6 +65,19 @@ class Pauli(Enum):
                 return "X"
             case Pauli.Y:
                 return "Y"
+
+    @cached_property
+    def color(self) -> str:
+        """Define color per Pauli operator for plotting."""
+        match self:
+            case Pauli.I:
+                return "#FFFFFF"  # white for identity
+            case Pauli.Z:
+                return "#D15567"  # muted purple, complements red/pink
+            case Pauli.X:
+                return "#E17C88"  # muted red, in tone with syndrome reds
+            case Pauli.Y:
+                return "#F28EBF"  # softer pink, between X and Z
 
 
 QubitIndex = int | slice | tuple[int | slice, int | slice]
@@ -215,8 +249,8 @@ class Lattice:
         """Retrieve mutable view of Lattice."""
         return MutableLattice(self, self._build_mask(qubits))
 
-    def plot(self) -> None:
-        """Plot lattice."""
+    def show(self) -> None:
+        """Show lattice."""
         L: int = self.L
         n: int = self.n
         tableau: NDArray[np.uint8] = self.tableau
@@ -227,7 +261,6 @@ class Lattice:
         def draw_polygon_or_wedge(
             indices: NDArray[np.intp],
             color: str,
-            alpha: float,
         ) -> None:
             x = indices % L
             y = L - 1 - indices // L
@@ -235,7 +268,12 @@ class Lattice:
             if len(indices) == 4:
                 pts = np.column_stack((x, y))
                 pts[[-2, -1]] = pts[[-1, -2]]
-                patch = Polygon(list(pts), color=color, alpha=alpha)
+                patch = Polygon(
+                    list(pts),
+                    facecolor=color,
+                    edgecolor="k",
+                    linewidth=0.75,
+                )
             elif len(indices) == 2:
                 cx, cy = float(np.mean(x)), float(np.mean(y))
                 if y[0] == y[1] == 0:
@@ -251,8 +289,9 @@ class Lattice:
                     r=0.5,
                     theta1=theta1,
                     theta2=theta2,
-                    color=color,
-                    alpha=alpha,
+                    facecolor=color,
+                    edgecolor="k",
+                    linewidth=0.75,
                 )
             else:
                 return
@@ -262,20 +301,22 @@ class Lattice:
         for stab in tableau[: (n - 1) // 2]:  # pyright: ignore[reportAny]
             indices = np.where(stab[:n] == 1)[0]  # pyright: ignore[reportAny]
             if stab[-1] != 1:
-                draw_polygon_or_wedge(indices, "orange", 0.5)
+                draw_polygon_or_wedge(indices, "#6188b2")
             else:
-                draw_polygon_or_wedge(indices, "red", 0.5)
+                draw_polygon_or_wedge(indices, "#D15567")
 
         for stab in tableau[(n - 1) // 2 :]:  # pyright: ignore[reportAny]
             indices = np.where(stab[n:-1] == 1)[0]  # pyright: ignore[reportAny]
             if stab[-1] != 1:
-                draw_polygon_or_wedge(indices, "cyan", 0.5)
+                draw_polygon_or_wedge(indices, "#87b1d3")
             else:
-                draw_polygon_or_wedge(indices, "red", 0.3)
+                draw_polygon_or_wedge(indices, "#E17C88")
 
-        ax.scatter(grid_x, grid_y, s=100, color="k")  # pyright: ignore[reportUnknownMemberType]
-        ax.set_xticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        ax.scatter(grid_x, grid_y, s=60, color="white", edgecolor="black")  # pyright: ignore[reportUnknownMemberType]
+
         ax.set_yticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        ax.set_xticks(np.arange(L))  # pyright: ignore[reportUnknownMemberType]
+        ax.tick_params(axis="x", labeltop=True, labelbottom=False)  # pyright: ignore[reportUnknownMemberType]
         ax.set_aspect("equal")  # pyright: ignore[reportUnknownMemberType]
         ax.set_xlim(-1, L)  # pyright: ignore[reportUnknownMemberType]
         ax.set_ylim(-1, L)  # pyright: ignore[reportUnknownMemberType]
@@ -284,26 +325,22 @@ class Lattice:
         ax.legend(  # pyright: ignore[reportUnknownMemberType]
             handles=[
                 Patch(
-                    facecolor="orange",
-                    alpha=0.5,
+                    facecolor="#87b1d3",
                     edgecolor="black",
                     label="X-Stabiliser",
                 ),
                 Patch(
-                    facecolor="cyan",
-                    alpha=0.5,
+                    facecolor="#87b1d3",
                     edgecolor="black",
                     label="Z-Stabiliser",
                 ),
                 Patch(
-                    facecolor="red",
-                    alpha=0.5,
+                    facecolor="#E17C88",
                     edgecolor="black",
                     label="X-Stabiliser Syndrome",
                 ),
                 Patch(
-                    facecolor="red",
-                    alpha=0.3,
+                    facecolor="#D15567",
                     edgecolor="black",
                     label="Z-Stabiliser Syndrome",
                 ),
@@ -311,19 +348,25 @@ class Lattice:
             handlelength=1,
             handleheight=1,
             borderpad=0.5,
-            loc="upper left",
-            bbox_to_anchor=(0.01, -0.05),
-            fontsize=11,
+            loc="lower center",  # centre in axes
+            bbox_to_anchor=(0.5, -0.10),
+            fontsize=10,
             markerscale=2.0,
+            ncol=4,
         )
 
-        ops = [(Pauli(op), q % L, L - q // L - 1) for q, op in enumerate(self.paulis)]  # pyright: ignore[reportAny]
-        for op, x, y in ops:
-            if op == Pauli.I:
+        for q, op in enumerate(self.paulis):  # pyright: ignore[reportAny]
+            if not op:
                 continue
-            _ = plt.plot(x, y, marker="o", color="red", markersize=10)
+            p = Pauli(op)
+            x, y = q % L, L - q // L - 1
+            _ = plt.scatter(x, y, color=p.color, edgecolor="black", s=60)
             _ = plt.text(  # pyright: ignore[reportUnknownMemberType]
-                x + 0.1, y + 0.1, f"${op}$", ha="left", va="bottom"
+                x + 0.1,
+                y + 0.1,
+                f"$\\mathrm{{{p}}}_{{{q}}}$",
+                ha="left",
+                va="bottom",
             )
 
         plt.show()  # pyright: ignore[reportUnknownMemberType]
@@ -389,7 +432,6 @@ class MutableLattice:
 
     def Z(self):
         """Apply Z gate."""
-        print(self.mask)
         self.paulis[self.mask] ^= Pauli.Z.value
         return self.S().S()
 
