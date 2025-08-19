@@ -1,10 +1,11 @@
 [project]
 name = "surfq"
-version = "0.1.0"
+version = "0.2.0"
 description = "A surface code simulator"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "matplotlib>=3.10.5",
     "numpy>=2.3.2",
 ]
 authors = [

@@ -5,10 +5,9 @@ from lattice import Lattice
 
 def main():
     """Entry-point."""
-    lattice = Lattice(5)
-    _ = lattice.X(9)
-    _ = lattice.X(6)
-    _ = lattice.plot()
+    lattice = Lattice(3)
+    _ = lattice[:].X().Z()[0].X()
+    lattice.plot()
 
 
 if __name__ == "__main__":
