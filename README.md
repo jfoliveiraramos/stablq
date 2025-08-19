@@ -21,10 +21,6 @@ uv run examples/main.py
 ```shell
 uvx juv run notebooks/main.py
 ```
-```
-```
-```
-```
 
 ## References
 
