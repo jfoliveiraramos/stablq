@@ -16,6 +16,7 @@ Typical usage example:
   >>> lattice.show()
 """
 
+import importlib.resources
 from logging import warning
 from pathlib import Path, PosixPath
 
@@ -30,15 +31,17 @@ from numpy.typing import NDArray
 from .pauli import Pauli
 
 sns.set_style("darkgrid")
-font_path = Path(__file__).parent / "resources" / "fonts" / "Roboto-Regular.ttf"
-roboto_font = fm.FontProperties(fname=PosixPath(font_path))
-fm.fontManager.addfont(str(font_path))  # pyright: ignore[reportAny]
+font_resource = importlib.resources.files("surfq").joinpath("fonts/Roboto-Regular.ttf")
+
+with importlib.resources.as_file(font_resource) as font_path:
+    roboto_font = fm.FontProperties(fname=PosixPath(Path(font_path)))
+    fm.fontManager.addfont(str(font_path))  # pyright: ignore[reportAny]
 mpl.rcParams.update(  # pyright: ignore[reportUnknownMemberType]
     {
-        "font.family": roboto_font.get_name(),  # Prettier font
+        "font.family": roboto_font.get_name(),
         "font.size": 12,
-        "grid.color": "0.5",  # Softer grid
-        "grid.linestyle": "--",  # Dashed grid lines
+        "grid.color": "0.5",
+        "grid.linestyle": "--",
         "grid.linewidth": 0.6,
         "xtick.color": "black",
         "ytick.color": "black",
