@@ -1,4 +1,20 @@
-"""Define plotting settings and utilities."""
+"""A module for plotting surface code lattices.
+
+This module provides a set of functions for plotting surface code lattices,
+including the qubits, the stabilizers, and the Pauli operators.
+
+It uses the `matplotlib` library to generate the plots, and it provides a
+set of custom styles and colors to make the plots easy to read and
+understand.
+
+Typical usage example:
+
+  >>> from surfq import Lattice
+  >>>
+  >>> lattice = Lattice(3)
+  >>> lattice.qubits[0, 0].X()
+  >>> lattice.show()
+"""
 
 from logging import warning
 from pathlib import Path, PosixPath
@@ -33,7 +49,16 @@ mpl.rcParams.update(  # pyright: ignore[reportUnknownMemberType]
 
 
 def plot_lattice(L: int, tableau: NDArray[np.uint8], paulis: NDArray[np.uint8]) -> None:
-    """Show lattice."""
+    """Plot a surface code lattice.
+
+    This function plots a surface code lattice, including the qubits, the
+    stabilizers, and the Pauli operators.
+
+    Args:
+        L: The size of the lattice.
+        tableau: The tableau of the stabilizers.
+        paulis: The Pauli operators on the qubits.
+    """
     n = L**2
 
     if L >= 20:

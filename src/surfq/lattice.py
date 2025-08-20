@@ -1,4 +1,17 @@
-"""Define surface code lattice class."""
+"""A module for representing a surface code lattice.
+
+This module provides a `Lattice` class that represents a surface code lattice.
+It is used to create a lattice of a given size, and it provides methods for
+accessing and modifying the qubits in the lattice.
+
+Typical usage example:
+
+  >>> from surfq import Lattice
+  >>>
+  >>> lattice = Lattice(3)
+  >>> lattice.qubits[0, 0].X()
+  >>> lattice.show()
+"""
 
 from typing import final
 
@@ -12,10 +25,27 @@ from .plotting import plot_lattice
 
 @final
 class Lattice:
-    """Surface Code Lattice class."""
+    """A class representing a surface code lattice.
+
+    This class is used to create a surface code lattice of a given size.
+
+    Attributes:
+        L: The size of the lattice.
+        n: The number of qubits in the lattice.
+        tableau: The tableau of the stabilizers.
+        stabilisers_coords: The coordinates of the stabilizers.
+        paulis: The Pauli operators currently applied on the qubits.
+    """
 
     def __init__(self, L: int):
-        """Initialise a square n×n lattice of qubits, all set to identity Pauli."""
+        """Initialise a new surface code lattice.
+
+        Args:
+            L: The size of the LxL lattice.
+
+        Raises:
+            ValueError: If the lattice size is not a positive odd integer.
+        """
         if L <= 0:
             raise ValueError("n must be a positive integer")
         elif L % 2 != 1:
@@ -28,22 +58,30 @@ class Lattice:
         )
 
     @property
-    def X_stabilisers(self):
-        """Retrieve X stablisers."""
+    def X_stabilisers(self) -> tuple[NDArray[np.uint8], NDArray[np.float64]]:
+        """Returns the X stabilizers of the lattice."""
         return self.tableau[: (self.n - 1) // 2], self.stabilisers_coords[
             : (self.n - 1) // 2
         ]
 
     @property
     def Z_stabilisers(self):
-        """Retrieve Z stablisers."""
+        """Returns the Z stabilizers of the lattice."""
         return self.tableau[(self.n - 1) // 2 :], self.stabilisers_coords[
             (self.n - 1) // 2 :
         ]
 
     @staticmethod
     def create_stabilisers(L: int):
-        """Define stabilisers."""
+        """Create the stabilizers for a surface code lattice.
+
+        Args:
+            L: The size of the lattice.
+
+        Returns:
+            A tuple containing the tableau of the stabilizers and the
+            coordinates of the stabilizers.
+        """
         n = L**2
         stabilisers: list[NDArray[np.uint8]] = []
         coordinates: list[tuple[float, float]] = []
@@ -165,10 +203,17 @@ class Lattice:
                     )
 
     def __getitem__(self, qubits: QubitIndex) -> "LatticeView":
-        """Retrieve mutable view of Lattice."""
+        """Return a view of the lattice.
+
+        Args:
+            qubits: The qubits to include in the view.
+
+        Returns:
+            A view of the lattice.
+        """
         self._validate_qubit(qubits)
         return LatticeView(self.L, self.paulis, self.tableau, qubits)
 
     def show(self) -> None:
-        """Plot lattice."""
+        """Plot the lattice."""
         plot_lattice(self.L, self.tableau, self.paulis)
