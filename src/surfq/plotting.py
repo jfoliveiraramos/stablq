@@ -1,4 +1,4 @@
-"""Plotting methods."""
+"""Define plotting settings and utilities."""
 
 from logging import warning
 from pathlib import Path, PosixPath
@@ -126,12 +126,12 @@ def plot_lattice(L: int, tableau: NDArray[np.uint8], paulis: NDArray[np.uint8]) 
                 label="Z-Stabiliser",
             ),
             Patch(
-                facecolor="#E17C88",
+                facecolor="#D15567",
                 edgecolor="black",
                 label="X-Stabiliser Syndrome",
             ),
             Patch(
-                facecolor="#D15567",
+                facecolor="#E17C88",
                 edgecolor="black",
                 label="Z-Stabiliser Syndrome",
             ),

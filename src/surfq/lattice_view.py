@@ -9,8 +9,10 @@ from .pauli import Pauli
 from .plotting import plot_lattice
 
 QubitMask = NDArray[np.uint64]
-QubitAxisIndex = int | slice | NDArray[np.uint64]
-QubitIndex = int | slice | tuple[QubitAxisIndex, QubitAxisIndex] | QubitMask
+QubitAxisIndex = int | slice | list[int] | QubitMask
+QubitIndex = (
+    QubitAxisIndex | tuple[QubitAxisIndex, QubitAxisIndex] | list[tuple[int, int]]
+)
 
 
 @final
@@ -57,6 +59,11 @@ class LatticeView:
             return np.arange(start, stop, step, dtype=np.uint64)
         elif isinstance(qubits, int):
             return np.array([qubits], dtype=np.uint64)
+        elif isinstance(qubits, list):
+            if all(isinstance(x, int) for x in qubits):
+                return np.array(qubits, dtype=np.uint64)
+            else:
+                return np.array([x + y * self.L for x, y in qubits])
         else:
             return qubits
 
