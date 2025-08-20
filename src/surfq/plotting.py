@@ -30,9 +30,7 @@ from numpy.typing import NDArray
 from .pauli import Pauli
 
 sns.set_style("darkgrid")
-font_path = (
-    Path(__file__).parent.parent.parent / "resources" / "fonts" / "Roboto-Regular.ttf"
-)
+font_path = Path(__file__).parent / "resources" / "fonts" / "Roboto-Regular.ttf"
 roboto_font = fm.FontProperties(fname=PosixPath(font_path))
 fm.fontManager.addfont(str(font_path))  # pyright: ignore[reportAny]
 mpl.rcParams.update(  # pyright: ignore[reportUnknownMemberType]
