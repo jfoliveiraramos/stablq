@@ -123,7 +123,7 @@ class LatticeView:
             xs_len = 1 if isinstance(xs, int) else len(xs)
             ys_len = 1 if isinstance(ys, int) else len(ys)
 
-            return (np.repeat(xs, ys_len) + np.tile(ys, xs_len) * self.L).astype(
+            return (np.tile(xs, ys_len) + np.repeat(ys, xs_len) * self.L).astype(
                 np.uint64
             )
         elif isinstance(qubits, slice):
@@ -186,10 +186,11 @@ class LatticeView:
             )
         self.tableau[:, t_mask] ^= self.tableau[:, c_mask]
         self.tableau[:, self.n + c_mask] ^= self.tableau[:, self.n + t_mask]
-        self.tableau[:, -1] ^= (
+        self.tableau[:, -1] ^= np.bitwise_xor.reduce(
             self.tableau[:, c_mask]
             & self.tableau[:, self.n + t_mask]
-            & (self.tableau[:, t_mask] ^ self.tableau[:, self.n + c_mask] ^ 1)
+            & (self.tableau[:, t_mask] ^ self.tableau[:, self.n + c_mask] ^ 1),
+            axis=1,
         )
         return self
 
