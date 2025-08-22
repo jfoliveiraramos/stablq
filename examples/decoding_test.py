@@ -51,6 +51,7 @@ def main():
     # _ = lattice[0, [0, 3]].Z()
     # _ = lattice[L - 1, [2, 4]].Z()
     _ = lattice[[(4, 3), (5, 4), (6, 5), (6, 6)]].X()
+    _ = lattice[[(3, 8), (4, 8)]].X()
     lattice.show()
 
     G: nx.Graph[int] = nx.Graph()
