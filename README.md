@@ -62,6 +62,15 @@ This project contains a set of notebooks to experiment with. We recommend using 
 uvx juv run notebooks/tutorial/notebook.py
 ```
 
+
+## Testing
+
+Run the unit test suite with:
+
+``` 
+uv run pytest
+```
+
 ## References
 
 - [Improved Simulation of Stabilizer Circuits](https://arxiv.org/pdf/quant-ph/0406196v5) – Aaronson and Gottesman, 2004
