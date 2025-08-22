@@ -12,7 +12,7 @@
 
 ## Usage
 
-This package is available on PyPi. To use it you can simply install on your environment with *pip*:
+This package is available on [PyPi](https://pypi.org/project/surfq/). To use it you can simply install on your environment with *pip*:
 
 ```shell
 pip install surfq
