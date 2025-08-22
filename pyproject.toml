@@ -1,6 +1,6 @@
 [project]
 name = "surfq"
-version = "0.1.2"
+version = "0.1.3"
 description = "A surface code simulator"
 readme = "README.md"
 requires-python = ">=3.13"
