@@ -38,9 +38,18 @@ l.show()
 
 ## Examples
 
-This project contains a set of example scripts to experiment with. We recommend using [juv](https://github.com/manzt/juv) for seamless dependency management.
+This project contains a set of example scripts to experiment with. We recommend using [uv](https://github.com/manzt/juv) for seamless dependency management.
+
+- **Decoding Test 1**: This script showcases a successful example of the current in-progress work on decoding error syndromes.
+
 ```shell
-uv examples/main.py
+uv run examples/decoding_1.py
+```
+
+- **Decoding Test 2**: This script showcases a wrong example of the current in-progress work on decoding error syndromes.
+
+```shell
+uv run examples/decoding_2.py
 ```
 
 ## Notebooks
